@@ -1,5 +1,4 @@
 const express = require("express");
-const authMiddleware = require("../middleware/authMiddleWare");
 const qs = require("qs");
 const { createQueryString } = require("../controllers/AssetController");
 const { readShopAssets } = require("../controllers/page-controllers/shop-view/ShopViewController");

@@ -3,12 +3,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require("morgan");
-const http = require("http");
 
 const Database = require("./db.js");
-const FileWatchService = require("./src/controllers/filewatch-service/FileWatchService.js");
-const WebSocketService = require("./src/controllers/web-socket-service/WebSocketService.js");
-const authRoutes = require("./src/routes/authRoutes.js");
 const assetRoutes = require("./src/routes/assetRoutes.js");
 const assetViewRoutes = require("./src/routes/AsssetViewRoutes.js");
 const eventDeltaRoutes = require("./src/routes/eventDeltaRoutes.js");
@@ -30,7 +26,6 @@ const reportsViewRoutes = require("./src/routes/ReportsViewRoutes.js");
 /* MIDDLEWARE CONFIGURATIONS */
 dotenv.config();
 const app = express();
-const httpServer = http.createServer(app);
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(morgan("dev"));
 app.use(cors());
@@ -43,7 +38,6 @@ app.use((req, res, next) => {
 
 /* ROUTES */
 const API_ENDPOINT = "/api";
-app.use(API_ENDPOINT + "/auth", authRoutes);
 app.use(API_ENDPOINT + "/shift", shiftRoutes);
 app.use(API_ENDPOINT + "/log", logRoutes);
 app.use(API_ENDPOINT + "/asset", assetRoutes);
@@ -75,38 +69,14 @@ app.use((error, _, res) => {
 
 /* DATABASE CONFIGURATIONS */
 const SERVER_PORT = process.env.SERVER_PORT || 6000;
-const WEB_SOCKET_SERVER_PORT = process.env.WEB_SOCKET_SERVER_PORT || 6001;
 
 const db = new Database();
 db.connect(process.env.MONGO_URL)
   .then(() => {
     app.listen(SERVER_PORT, () => {
-      console.log(`App server running on port: ${SERVER_PORT}`);
+      console.log(`Ore-Tech API server running on port: ${SERVER_PORT}`);
     });
   })
   .catch((err) => {
     console.log(`Error: ${err.message}`);
   });
-
-/* WATCH FOR STATUS CHANGE FROM WENCO AND MINESTAR */
-const fileWatchService = new FileWatchService(
-  process.env.FLEET_STATUS_DATA_DIR
-);
-const webSocketService = new WebSocketService(httpServer);
-
-fileWatchService.on("FileEventProcessor", (data) => {
-  webSocketService.broadcast(JSON.stringify(data));
-});
-
-fileWatchService.startWatching();
-httpServer.listen(WEB_SOCKET_SERVER_PORT, () => {
-  console.log(`Web socket server running on port: ${WEB_SOCKET_SERVER_PORT}`);
-});
-httpServer.on("error", (error) => {
-  if (error.code === "EADDRINUSE") {
-    console.log("Port 3002 is in use, trying another port...");
-    server.listen(0);
-  } else {
-    throw error;
-  }
-});

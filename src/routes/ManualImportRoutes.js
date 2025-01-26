@@ -1,5 +1,4 @@
 const express = require("express");
-const authMiddleware = require("../middleware/authMiddleWare.js");
 const {
   createNewEvent,
   createNewAssetAndEvent,
@@ -9,8 +8,6 @@ const router = express.Router();
 // Route for creating manual event
 router.post(
   "/create-manual-event",
-  authMiddleware.verifyToken,
-  authMiddleware.verifyPermissions("canWriteAll"),
   async (req, res) => {
     const { data, metaData } = req.body;
     try {
@@ -28,8 +25,6 @@ router.post(
 // Route for creating asset and event
 router.post(
   "/create-asset",
-  authMiddleware.verifyToken,
-  authMiddleware.verifyPermissions("canWriteAll"),
   async (req, res) => {
     const { data, metaData } = req.body;
     try {

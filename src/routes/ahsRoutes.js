@@ -1,8 +1,6 @@
 const express = require("express");
 const ahsCalibrationsController = require("../controllers/page-controllers/ahs-calibration-view/AHSCalibrationsController");
-const {updateAHSAsset} = require("../controllers/AHSAssetController");
-const { readAHSTrucks } = require("../controllers/AssetController");
-const authMiddleware = require("../middleware/authMiddleWare");
+const { updateAHSAsset } = require("../controllers/AHSAssetController");
 
 const router = express.Router();
 router.post("/", async (req, res) => {
@@ -13,13 +11,13 @@ router.post("/", async (req, res) => {
       await ahsCalibrationsController.createAHSCalibrationRecord(
         ahsCalibrationRecord
       );
-	  await updateAHSAsset(
-		{"unitId": ahsCalibrationRecord.unitId}, 
-		{
-			"minestarVersion": ahsCalibrationRecord.minestarVersion, 
-			"lastUpdatedBy": metaData.id,
-		}
-	  )
+    await updateAHSAsset(
+      { unitId: ahsCalibrationRecord.unitId },
+      {
+        minestarVersion: ahsCalibrationRecord.minestarVersion,
+        lastUpdatedBy: metaData.id,
+      }
+    );
     res.status(200).json(savedAHSREcord);
   } catch (error) {
     console.error(error);
@@ -70,14 +68,15 @@ router.get("/archived", async (req, res) => {
 
 router.patch("/", async (req, res) => {
   const { data, metaData } = req.body;
-  const assetFilter = {"unitId": data.unitId}
+  const assetFilter = { unitId: data.unitId };
   const assetUpdate = {
-	minestarVersion: data.minestarVersion,
-	lastUpdatedBy: metaData.id
-}
+    minestarVersion: data.minestarVersion,
+    lastUpdatedBy: metaData.id,
+  };
   try {
-    const updatedAHSCalibrationRecord = await ahsCalibrationsController.updateAHSCalibrations(data);
-	await updateAHSAsset(assetFilter, assetUpdate)
+    const updatedAHSCalibrationRecord =
+      await ahsCalibrationsController.updateAHSCalibrations(data);
+    await updateAHSAsset(assetFilter, assetUpdate);
     res.status(200).json(updatedAHSCalibrationRecord);
   } catch (error) {
     console.error(error);
@@ -88,12 +87,9 @@ router.patch("/ahs-asset", async (req, res) => {
   const data = req.body.data;
   const metaData = req.body.metaData;
   try {
-    const filter = { "unitId": data.unitId };
+    const filter = { unitId: data.unitId };
     const update = { ...data, lastUpdatedBy: metaData.id };
-    const updatedAHSAsset = await updateAHSAsset(
-      filter,
-      update
-    );
+    const updatedAHSAsset = await updateAHSAsset(filter, update);
     res.status(200).json(updatedAHSAsset);
   } catch (error) {
     console.error(error);

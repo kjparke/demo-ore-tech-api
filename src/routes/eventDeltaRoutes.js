@@ -12,8 +12,6 @@ const {
   updateDeltas,
 } = require('../controllers/ShiftSummaryModalController');
 
-const authMiddleware = require("../middleware/authMiddleWare");
-
 const router = express.Router();
 router.get("/:id", readLastEventDeltaPerHour);
 
@@ -39,7 +37,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.patch("/update-deltas", authMiddleware.verifyToken, authMiddleware.verifyPermissions("canUpdateAll"), async (req, res) => {
+router.patch("/update-deltas", async (req, res) => {
   const { originalDeltas, modifiedDeltas, date } = req.body.data;
 
   try {
