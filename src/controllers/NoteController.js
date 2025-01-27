@@ -33,6 +33,7 @@ exports.createNoteTest = async (req, res) => {
     const savedNote = await newNote.save();
     return res.status(200).json(savedNote.toObject);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ Error: error.message });
   }
 };
@@ -71,18 +72,33 @@ exports.readLatestNote = async (req, res) => {
 
 exports.readEventNotes = async (req, res) => {
   const eventId = req.params.id;
+  const dummyUser = {
+    _id: "65ba9148b0fd8d6dd585a5b4",
+    firstName: "John",
+    lastName: "Appleseed",
+    password: "$2b$10$NxodOVtemkyavXCHrY.2SOIDahsDLjjxXpvn.Ycf9OTzPXcxDJsnK",
+    email: "jon@test.com",
+    accessLevel: 1,
+    lastLoggedIn: "2024-10-01T16:10:27.310Z",
+    createdAt: "2024-01-31T18:28:24.438Z",
+    updatedAt: "2024-10-01T16:10:27.311Z",
+    hasTemporaryPassword: true,
+    isActive: true
+  }
   try {
-    const notes = await Note.find({ eventId: eventId }).populate("userId");
-    res.status(200).json(notes);
+    const notes = await Note.find({ eventId: eventId });
+
+    const updatedNotes = await Promise.all(
+      notes.map(async (note) => {
+        note.userId = dummyUser; 
+        return note.save();
+      })
+    );
+    console.log(updatedNotes);
+    res.status(200).json(updatedNotes);
   } catch (error) {
+    console.error(error)
     res.status(500).json({ Error: error.message });
   }
 };
 
-/* UPDATE */
-exports.updateNote = async (req, res) => {
-  try {
-  } catch (error) {
-    res.status(500).json({ Error: error.message });
-  }
-};
