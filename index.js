@@ -36,6 +36,7 @@ const app = express();
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(morgan("dev"));
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 /* GLOBAL MIDDLEWARE */
 app.use((req, res, next) => {
