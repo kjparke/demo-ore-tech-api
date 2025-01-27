@@ -26,8 +26,9 @@ const reportsViewRoutes = require("./src/routes/ReportsViewRoutes.js");
 /* Configure CORS */
 const corsOptions = {
   origin: 'https://demo-ore-tech-app.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token '], 
+  credentials: true
 };
 
 /* MIDDLEWARE CONFIGURATIONS */
@@ -40,7 +41,15 @@ app.options('*', cors(corsOptions));
 
 /* GLOBAL MIDDLEWARE */
 app.use((req, res, next) => {
-  res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
+  res.header("Access-Control-Allow-Origin", "https://demo-ore-tech-app.vercel.app");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, x-access-token");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).send();
+  }
+
   next();
 });
 
