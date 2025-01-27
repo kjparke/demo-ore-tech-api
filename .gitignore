@@ -14,3 +14,4 @@ node_modules/
 # Ignore public folder data files
 public/*.json
 public/*.csv
+.vercel
