@@ -23,12 +23,19 @@ const shopViewRoutes = require("./src/routes/ShopViewRoutes.js");
 const shiftRosterRoutes = require("./src/routes/ShiftRosterRoutes.js");
 const reportsViewRoutes = require("./src/routes/ReportsViewRoutes.js");
 
+/* Configure CORS */
+const corsOptions = {
+  origin: 'https://demo-ore-tech-app.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 /* MIDDLEWARE CONFIGURATIONS */
 dotenv.config();
 const app = express();
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(morgan("dev"));
-app.use(cors());
+app.use(cors(corsOptions));
 
 /* GLOBAL MIDDLEWARE */
 app.use((req, res, next) => {
