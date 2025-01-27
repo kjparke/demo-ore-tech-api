@@ -1,6 +1,4 @@
-const { OPERATIONAL_OOS, validHaulTrucks } = require("../constants/constants");
-const fs = require("fs");
-const { readAssetStatusCount } = require("./AssetController");
+const { readAssetStatusCount, readAssets } = require("./AssetController");
 const PhysicalAvailability = require("../models/PhysicalAvailability");
 
 exports.createPhysicalAvailabilityRecord = async (jsonMap) => {
@@ -15,7 +13,7 @@ exports.createPhysicalAvailabilityRecord = async (jsonMap) => {
 
 exports.getPhysicalAvailability = async (jsonMap) => {
   try {
-    const assets = jsonMap ?? getJSONData();
+    const assets = jsonMap ?? await getAssets();
     const operationalStatuses = [
       "noh",
       "operational",
@@ -87,7 +85,7 @@ exports.getPhysicalAvailability = async (jsonMap) => {
 };
 
 exports.getAssetCountByCategory = async (req, res) => {
-  const assets = getJSONData();
+  const assets = await getAssets();
   let countPerStatusCategory = {
     operational: 0,
     down_unscheduled: 0,
@@ -109,76 +107,15 @@ exports.getAssetCountByCategory = async (req, res) => {
   return res.status(200).json(countPerStatusCategory);
 };
 
-const getJSONData = () => {
-  const assetsData = fs.readFileSync(
-    process.env.FLEET_STATUS_DATA_DIR,
-    "utf-8"
-  );
-  let vehicleStatuses = JSON.parse(assetsData);
-  vehicleStatuses = formatFleetStatusData(vehicleStatuses);
+const getAssets = async () => {
+  const vehicleStatuses = await readAssets();
   return vehicleStatuses;
 };
 
-exports.getLastUpdated = (req, res) => {
+exports.getLastUpdated = async (req, res) => {
   try {
-    const assets = getJSONData();
-    lastUpdated = assets[0].refreshedTime;
-
-    res.status(200).json({ lastUpdated: lastUpdated });
+    res.status(200).json({ lastUpdated: new Date() });
   } catch (error) {
     console.error(error);
   }
-};
-
-const formatFleetStatusData = (vehicleStatuses) => {
-  const excludedUnitIds = ["6228", "6229", "6230", "6232", "6233", "6234"];
-  
-  vehicleStatuses.forEach((vehicleStatus) => {
-    const status = vehicleStatus.status ? vehicleStatus.status.toLowerCase() : null;
-    const secondaryStatus = vehicleStatus.secondaryStatus || "";
-
-    const modifiedSecondaryStatus = secondaryStatus.replace(/\s+/g, "").toLowerCase();
-
-    if (status === "exc" && modifiedSecondaryStatus.includes("commissioning/decommissioning")) {
-      vehicleStatus.status = OPERATIONAL_OOS;
-      vehicleStatus.secondaryStatus = "OoS - Comm/Decomm";
-    }
-
-    if (vehicleStatus.unitId === "6127") {
-      vehicleStatus.equipmentType = "AHT";
-    }
-
-    if (!vehicleStatus.status) {
-      vehicleStatus.status = "no status";
-    }
-
-    if (status === "down" && secondaryStatus.includes("Health Event")) {
-      vehicleStatus.status = "operational";
-    }
-
-    if (status === "down" && secondaryStatus.includes("Z-")) {
-      vehicleStatus.status = "down_waiting";
-    }
-
-    if (status === "down" && (secondaryStatus.includes("Unscheduled") || secondaryStatus.includes("Unsheduled"))) {
-      vehicleStatus.status = "down_unscheduled";
-    } else if (status === "down" && !secondaryStatus.includes("Unscheduled") && !secondaryStatus.includes("Unsheduled")) {
-      vehicleStatus.status = "down_scheduled";
-    }
-     // Remove invalid haul trucks
-     if (
-      vehicleStatus.equipmentType === "H" &&
-      (!vehicleStatus.modelCode || !validHaulTrucks.includes(vehicleStatus.modelCode.toLowerCase()))
-    ) {
-      vehicleStatus.equipmentType = null;
-    }
-  });
-
-  const filteredVehicleStatuses = vehicleStatuses.filter(
-    (vehicleStatus) =>
-      vehicleStatus.status?.toLowerCase() !== "exc" &&
-      !excludedUnitIds.includes(vehicleStatus.unitId)
-  );
-
-  return filteredVehicleStatuses;
 };
