@@ -97,3 +97,5 @@ db.connect(process.env.MONGO_URL)
   .catch((err) => {
     console.log(`Error: ${err.message}`);
   });
+
+module.exports = app;
