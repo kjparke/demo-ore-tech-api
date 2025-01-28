@@ -26,7 +26,7 @@ const reportsViewRoutes = require("./src/routes/ReportsViewRoutes.js");
 /* Configure CORS */
 const corsOptions = {
   origin: 'https://demo-ore-tech-app.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token '], 
   credentials: true
 };
