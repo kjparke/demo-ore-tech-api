@@ -77,9 +77,9 @@ app.use((req, res, next) => {
   next(Error.message);
 });
 
-app.use((error, _, res) => {
+app.use((error, req, res, next) => {
   console.error(error);
-  let errorMessage = "An unknown error has occured.";
+  let errorMessage = "An unknown error has occurred.";
   if (error instanceof Error) errorMessage = error.message;
   res.status(500).json({ error: errorMessage });
 });
